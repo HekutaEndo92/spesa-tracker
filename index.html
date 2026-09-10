@@ -123,8 +123,10 @@ input,select{font-family:inherit;font-size:inherit;color:inherit}
 .fab{position:absolute;bottom:calc(var(--nav) + 16px);right:16px;
   width:56px;height:56px;background:var(--acc);color:#fff;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 24px #6366f155;z-index:90;font-size:1.7rem;line-height:1;
-  transition:transform var(--tr),box-shadow var(--tr);flex-shrink:0}
+  box-shadow:0 6px 24px #6366f155;z-index:90;
+  transition:transform var(--tr),box-shadow var(--tr);flex-shrink:0;
+  font-size:2.2rem;font-weight:300;line-height:1;
+  padding-bottom:2px}
 .fab:active{transform:scale(.88);box-shadow:0 3px 10px #6366f144}
 
 /* ── MODALE ── */
@@ -220,10 +222,30 @@ input,select{font-family:inherit;font-size:inherit;color:inherit}
 
 /* BAR CHART */
 .barchart-wrap{width:100%;overflow:hidden}
-.barchart-inner{display:flex;align-items:flex-end;gap:3px;height:140px;padding-top:8px}
-.bar-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:0}
-.bar-rect{width:100%;border-radius:4px 4px 0 0;min-height:3px}
-.bar-lbl{font-size:.5rem;color:var(--t3);white-space:nowrap}
+.barchart-inner{
+  display:flex;
+  align-items:flex-end;
+  gap:3px;
+  height:140px;        /* altezza fissa del contenitore */
+  padding-top:8px;
+  box-sizing:border-box;
+}
+.bar-col{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;  /* ← ancora in basso */
+  gap:3px;
+  flex:1;
+  min-width:0;
+  height:100%;               /* ← occupa tutta l'altezza */
+}
+.bar-rect{
+  width:100%;
+  border-radius:4px 4px 0 0;
+  flex-shrink:0;             /* ← non si comprime */
+}
+.bar-lbl{font-size:.5rem;color:var(--t3);white-space:nowrap;flex-shrink:0}
 
 /* ENTRATE/USCITE BAR */
 .compare-bar{display:flex;flex-direction:column;gap:10px;margin-top:4px}
@@ -665,17 +687,28 @@ function renderPie(dati,tot){
 // ═══════════════════════════════════════════════
 //  BAR CHART — fix altezze
 // ═══════════════════════════════════════════════
-function renderBars(dati,colore){
-  if(!dati.length)return'<p style="color:var(--t3);font-size:.8rem;text-align:center;padding:20px 0">Nessun dato</p>';
-  const max=Math.max(...dati.map(d=>d.v),0.01);
-  const bars=dati.map(d=>{
-    const pct=Math.max(Math.round((d.v/max)*100),3);
-    return`<div class="bar-col">
-      <div class="bar-rect" style="height:${pct}%;background:${colore||'var(--acc)'};" title="${euro(d.v)}"></div>
+function renderBars(dati, colore) {
+  if (!dati.length) return '<p style="color:var(--t3);font-size:.8rem;text-align:center;padding:20px 0">Nessun dato</p>';
+
+  const max = Math.max(...dati.map(d => d.v), 0.01);
+
+  const bars = dati.map(d => {
+    // Altezza in pixel su base 120px di spazio utile
+    const ALTEZZA_MAX = 120;
+    const px = Math.max(Math.round((d.v / max) * ALTEZZA_MAX), 3);
+
+    return `<div class="bar-col">
+      <div class="bar-rect"
+        style="height:${px}px;background:${colore || 'var(--acc)'};"
+        title="${euro(d.v)}">
+      </div>
       <span class="bar-lbl">${d.g}</span>
     </div>`;
   }).join('');
-  return`<div class="barchart-wrap"><div class="barchart-inner">${bars}</div></div>`;
+
+  return `<div class="barchart-wrap">
+    <div class="barchart-inner">${bars}</div>
+  </div>`;
 }
 
 // ═══════════════════════════════════════════════
@@ -768,7 +801,7 @@ function viewDash(){
       <div class="svuota">Premi + per aggiungere spese o entrate</div>
     </div>`}
 
-    <button class="fab" id="fabBtn">${SVG.plus}</button>
+    <button class="fab" id="fabBtn">+</button>
   `;
 }
 
